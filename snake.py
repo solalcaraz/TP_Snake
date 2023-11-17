@@ -5,7 +5,7 @@ import pygame, sys, random
 SCREEN_ANCHO = 800
 SCREEN_ALTO = 500
 #FPS
-FPS = 60
+FPS = 30
 #Paleta de colores
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
