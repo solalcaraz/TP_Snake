@@ -27,11 +27,11 @@ class Snake(pygame.sprite.Sprite):
 		#Velocidad inicial
 		self.X_vel = 0
 		self.Y_vel = 0
+		#Inicializo el movimiento a la derecha
+		self.direction = "RIGHT"
 
 	def cambio_velocidad(self, x, y):
-		self.X_vel += x
-		self.Y_vel += y
-
+		
 	def update(self):
 		#Actualiza esto cada vuelta del bucle
 		self.rect.x += self.X_vel
@@ -44,8 +44,9 @@ class Snake(pygame.sprite.Sprite):
 
 #inicializo pygame
 pygame.init()
-#Crear ventana
+#Crear ventana, le pongo nombre al juego
 screen = pygame.display.set_mode([SCREEN_ANCHO, SCREEN_ALTO])
+pygame.display.set_caption('Snake Game')
 #Definir reloj, controla los FPS 
 clock = pygame.time.Clock()
 #Fondo
@@ -74,23 +75,18 @@ while not perdedor:
 		if event.type == pygame.KEYDOWN:
 			#PRESIONO LA TECLA
 			if event.key == pygame.K_UP:
-				snake.cambio_velocidad(0, -3)
-			if event.key == pygame.K_DOWN:
-				snake.cambio_velocidad(0, 3)
-			if event.key == pygame.K_LEFT:
-				snake.cambio_velocidad(-3, 0)
-			if event.key == pygame.K_RIGHT:
-				snake.cambio_velocidad(3, 0)
-		if event.type == pygame.KEYUP:
-			#DEJO DE PRESIONAR LA TECLA
-			if event.key == pygame.K_UP:
-				snake.cambio_velocidad(0, -3)
-			if event.key == pygame.K_DOWN:
-				snake.cambio_velocidad(0, 3)
-			if event.key == pygame.K_LEFT:
-				snake.cambio_velocidad(-3, 0)
-			if event.key == pygame.K_RIGHT:
-				snake.cambio_velocidad(3, 0)
+				snake.cambio_velocidad(0, -2)
+				snake.direction = "UP"
+			elif event.key == pygame.K_DOWN:
+				snake.cambio_velocidad(0, 2)
+				snake.direction = "DOWN"
+			elif event.key == pygame.K_LEFT:
+				snake.cambio_velocidad(-2, 0)
+				snake.direction = "LEFT"
+			elif event.key == pygame.K_RIGHT:
+				snake.cambio_velocidad(2, 0)
+				snake.direction = "RIGHT"
+		
 
 	#Actualizacion del sprites
 	todos_sprites_list.update()
