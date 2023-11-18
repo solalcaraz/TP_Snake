@@ -1,25 +1,22 @@
 '''
 Juego de Snake.
 Participantes: Maria Sol Alcaraz
-			   Franco Medina
-			   Damian Palomba
+			  Franco Medina
+			  Damian Palomba
 '''
 
 import pygame, sys, random
 
-<<<<<<< HEAD
 #Pantalla
 #Cuadrados de 20x20, 25 de alto, 40 de ancho
 ANCHO = 800 
 ALTO = 500
 CUADROS = 20
-=======
 #Dimensiones de la ventana (tupla)
 SCREEN_ANCHO = 800
 SCREEN_ALTO = 500
 #FPS
 FPS = 30
->>>>>>> d0b56c0b36d19b70e3673fb26fd5e7b3ecd3e911
 #Paleta de colores
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
@@ -31,7 +28,6 @@ DERECHA = (1, 0)
 ARRIBA =(0, -1)
 ABAJO = (0, 1)
 #Preferencias
-POS_INICIAL = [((ANCHO // 2), (ALTO // 2))]
 LARGO_MAX = 10
 FPS = 60
 comenzar = "Yy"
@@ -55,14 +51,13 @@ class Snake(pygame.sprite.Sprite):
 		self.rect_down = self.imagen_down.get_rect()
 		
 		self.largo = 1
-		self.posicion = [POS_INICIAL]
+		self.posicion = [(ANCHO // 2, ALTO // 2)]
 		self.direccion = DERECHA
-		self.vel_x = 0
-		self.vel_y = 0
+		self.velocidad = 2
 
 	def posicion_inicial(self):
 		'''Devuelve la posicion de la cabeza'''
-		return tuple(self.posicion[0])
+		return self.posicion[0]
 
 	def es_perdedor(self):
 		'''Devuelve True si la cabeza de la serpiente está por fuera de los confines del campo.'''
@@ -82,35 +77,51 @@ class Snake(pygame.sprite.Sprite):
 		self.largo = 1
 		self.posicion = [POS_INICIAL]
 		self.direccion = DERECHA
-		self.vel_x = 0
-		self.vel_y = 0
+		self.velocidad = 1
 
 	def dibujo(self, pantalla):
+		cabeza = self.posicion_inicial()
 		if self.direccion == IZQUIERDA:
-			pantalla.blit(self.imagen_izq, self.posicion_inicial())
+			pantalla.blit(self.imagen_izq, cabeza)
 		elif self.direccion == DERECHA:
-			pantalla.blit(self.imagen_der, self.posicion_inicial())
+			pantalla.blit(self.imagen_der, cabeza)
 		elif self.direccion == ARRIBA:
-			pantalla.blit(self.imagen_up, self.posicion_inicial())
+			pantalla.blit(self.imagen_up, cabeza)
 		elif self.direccion == ABAJO:
-			pantalla.blit(self.imagen_down, self.posicion_inicial())
+			pantalla.blit(self.imagen_down, cabeza)
+
+		for segmento in self.posicion[1:]:
+			pygame.draw.rect(pantalla, COLOR_CUERPO, (segmento[0], segmento[1], CUADROS, CUADROS))
 
 	def update(self):
-		# Lógica de actualización aquí (por ejemplo, manejo de eventos de teclado)
-		keys = pygame.key.get_pressed()
-		if keys[pygame.K_UP]:
-			self.vel_y = -1
-			self.vel_x = 0
-		if keys[pygame.K_DOWN]:
-			self.vel_y = 1
-			self.vel_x = 0
-		if keys[pygame.K_LEFT]:
-			self.vel_x = -1
-			self.vel_y = 0
-		if keys[pygame.K_RIGHT]:
-			self.vel_x = 1
-			self.vel_y = 0
-    
+		#Actualiza la posicion en funcion de la direccion
+		x, y = self.posicion[0]
+		new_x = x + self.direccion[0] * self.velocidad
+		new_y = y + self.direccion[1] * self.velocidad
+		self.posicion.insert(0, (new_x, new_y))
+
+		if len(self.posicion) > self.largo:
+			self.posicion.pop()
+
+	def cambiar_direccion(self, nueva_direccion):
+		#Cambia la direccion del snake
+		if (self.direccion[0] + nueva_direccion[0]!= 0 or self.direccion[1] + nueva_direccion[1] != 0):
+			self.direccion = nueva_direccion
+
+#Preferencias de la fruta
+class Fruta(pygame.sprite.Sprite):
+	def __init__(self,):
+		self.imagen_fruta = pygame.image.load("manzana.png").convert()
+		self.imagen_fruta.set_colorkey(BLANCO)
+		self.rect_fruta = self.imagen_fruta.get_rect()
+		self.posicion = (0, 0)
+		self.random_posicion()
+
+	def random_posicion(self):
+		self.posicion = (random.randint(0, ALTO - 1), random.randint(0, ANCHO - 1))
+
+	def dibujo_fruta(self, pantalla):
+		pantalla.blit(self.imagen_fruta, self.posicion)
 
 '''Comienzo del juego.
 Inicializacion de pygame, configuracion general y bucle principal.
@@ -121,50 +132,47 @@ def main():
 	pygame.display.set_caption('Juego Snake')
 	clock = pygame.time.Clock()
 	fondo = pygame.image.load("fondo.png").convert()
-	termina = False
-
+	iniciado = False
 
 	snake = Snake()
-	#fruta = Fruta()
+	fruta = Fruta()
 
-	while not termina:
+	while True:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				termina = True
+				pygame.quit()
+				sys.exit()
 			elif event.type == pygame.KEYDOWN:
+				if not iniciado:
+					iniciado = True
 				if event.key == pygame.K_UP:
-					snake.direccion = ARRIBA
+					snake.cambiar_direccion(ARRIBA)
 				elif event.key == pygame.K_DOWN:
-					snake.direccion = ABAJO
+					snake.cambiar_direccion(ABAJO)
 				elif event.key == pygame.K_LEFT:
-					snake.direccion = IZQUIERDA
+					snake.cambiar_direccion(IZQUIERDA)
 				elif event.key == pygame.K_RIGHT:
-					snake.direccion = DERECHA
+					snake.cambiar_direccion(DERECHA)
 
-		snake.update()
+		if iniciado:
+			snake.update()
+			if snake.posicion_inicial == fruta.posicion:
+				snake.largo += 1
+				fruta.random_posicion()
+
+		if snake.es_perdedor() or snake.es_ganador():
+			snake.reset()
+			fruta.random_posicion()
+
 		screen.blit(fondo, [0, 0])
+
+		fruta.dibujo_fruta(screen)
 		snake.dibujo(screen)
-		pygame.display.flip()
+
+		pygame.display.update()
 		clock.tick(FPS)
 
 	pygame.quit()
 
-<<<<<<< HEAD
 if __name__ == "__main__":
     main()
-=======
-	#Actualizacion del sprites
-	todos_sprites_list.update()
-
-	#Definir el fondo		
-	screen.blit(fondo, [0, 0])
-
-	#Dibujo
-	todos_sprites_list.draw(screen)
-
-	#Actualizarr pantalla
-	pygame.display.flip()
-	#Configurar reloj, en FPS, su velocidad
-	clock.tick(FPS)
-pygame.quit()
->>>>>>> d0b56c0b36d19b70e3673fb26fd5e7b3ecd3e911
