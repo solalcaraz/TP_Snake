@@ -30,7 +30,6 @@ ABAJO = (0, 1)
 #Preferencias
 LARGO_MAX = 10
 FPS = 60
-comenzar = "Yy"
 
 #Preferencias del snake
 class Snake(pygame.sprite.Sprite):
@@ -100,13 +99,17 @@ class Snake(pygame.sprite.Sprite):
 		new_y = y + self.direccion[1] * self.velocidad
 		self.posicion.insert(0, (new_x, new_y))
 
-		if len(self.posicion) > self.largo:
-			self.posicion.pop()
-
 	def cambiar_direccion(self, nueva_direccion):
 		#Cambia la direccion del snake
 		if (self.direccion[0] + nueva_direccion[0]!= 0 or self.direccion[1] + nueva_direccion[1] != 0):
 			self.direccion = nueva_direccion
+
+	def comio_fruta(self, fruta):
+		cabeza_x, cabeza_y = self.posicion_inicial()
+		fruta_x, fruta_y = fruta.posicion
+		cabeza_rect = pygame.Rect(cabeza_x, cabeza_y, CUADROS, CUADROS)
+		fruta_rect = pygame.Rect(fruta_x, fruta_y, CUADROS, CUADROS)
+		return cabeza_rect.colliderect(fruta_rect)
 
 #Preferencias de la fruta
 class Fruta(pygame.sprite.Sprite):
@@ -119,6 +122,10 @@ class Fruta(pygame.sprite.Sprite):
 
 	def random_posicion(self):
 		self.posicion = (random.randint(0, ALTO - 1), random.randint(0, ANCHO - 1))
+
+	def actualizar_fruta(self, snake):
+		if snake.posicion_inicial() == self.posicion:
+			self.random_posicion()
 
 	def dibujo_fruta(self, pantalla):
 		pantalla.blit(self.imagen_fruta, self.posicion)
@@ -156,7 +163,8 @@ def main():
 
 		if iniciado:
 			snake.update()
-			if snake.posicion_inicial == fruta.posicion:
+			fruta.actualizar_fruta(snake)
+			if snake.comio_fruta(fruta):
 				snake.largo += 1
 				fruta.random_posicion()
 
