@@ -10,7 +10,7 @@ ALTURA = 600
 #FPS
 FPS = 30
 #Paleta de colores
-NEGRO = (0, 0, 0)
+NEGRO = (0, 0, 0, 100)
 BLANCO = (255, 255, 255)
 COLOR_CUERPO = (0, 255, 255)
 COLOR_FRUTA = (255, 200, 0)
@@ -139,6 +139,10 @@ def es_perdedor(snake, pos_snake):
         return True
     return False
 def game_over(ventana, puntaje):
+    rect_negro = pygame.Rect(0,0,800,600)
+    sup_negra = pygame.Surface(rect_negro.size,pygame.SRCALPHA)
+    pygame.draw.rect(sup_negra, NEGRO, sup_negra.get_rect())
+    ventana.blit(sup_negra,rect_negro)
     fuente = pygame.font.SysFont('Times new roman',50)
     area_impresion = fuente.render('Has Muerto. Puntaje: ' + str(puntaje), True, NEGRO)
     area_rect = area_impresion.get_rect()
