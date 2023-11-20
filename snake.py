@@ -1,5 +1,6 @@
 import pygame
 from random import randint
+from time import sleep
 
 #Pantalla
 ANCHO = 800
@@ -28,6 +29,7 @@ def main():
     snake = [[400,300],[380,300],[360,300],[340,300]]
     pos_snake = [340,300] #Posicion de la cabeza del snake en todo momento.
     fruta = posicion_aleatoria(ANCHO,ALTURA,snake);
+    puntaje = 0
     
     cabeza_izq = pygame.image.load("cabeza_izquierda.png").convert()
     cabeza_izq.set_colorkey(NEGRO)
@@ -44,8 +46,8 @@ def main():
     fruta_imag = pygame.image.load("manzana.png").convert()
     fruta_imag.set_colorkey(NEGRO)
 
-    direccion = 'RIGHT'
-    cabeza_imagen = cabeza_der
+    direccion = 'LEFT'
+    cabeza_imagen = cabeza_izq
     dir_siguiente = direccion
 
     while(True):
@@ -53,6 +55,7 @@ def main():
         snake.append(pos_snake.copy())
         if pos_snake == fruta:
             fruta = posicion_aleatoria(ANCHO,ALTURA,snake);
+            puntaje += 1
         else:
             snake = snake[1:]
 
@@ -60,7 +63,8 @@ def main():
 
         imprimir_campo(snake, fruta, ventana, cabeza_imagen, cuerpo_imag, fruta_imag, pos_snake)
         if es_perdedor(snake, pos_snake): 
-            game_over(ventana)
+            game_over(ventana, puntaje)
+        print_puntaje(ventana, puntaje)
         pygame.display.update()
         fps.tick(VELOCIDAD)
     return
@@ -127,13 +131,29 @@ def imprimir_campo(snake, fruta, ventana, cabeza_imagen, cuerpo_imag, fruta_imag
     
 def es_perdedor(snake, pos_snake):
     #Busco si la proxima posicion esta dentro del snake, si lo está la cabeza tocó el cuerpo.
-    if any(pos_snake == pos_cuerpo for pos_cuerpo in snake[:-1]):
-        return True
+    for pos_cuerpo in snake[:-1]:
+        if pos_snake[0] == pos_cuerpo[0] and pos_snake[1] == pos_cuerpo[1]:
+            return True
     #Chequeo que la proxima posicion no se salga del campo.
     if (pos_snake[0] < 0 or pos_snake[0] > ANCHO - 20 or pos_snake[1] < 0 or pos_snake[1] > ALTURA - 20):
         return True
-        
-def game_over(ventana):
-    pygame.draw.rect(ventana, BLANCO, pygame.Rect(400,300,20,20))
+    return False
+def game_over(ventana, puntaje):
+    fuente = pygame.font.SysFont('Times new roman',50)
+    area_impresion = fuente.render('Has Muerto. Puntaje: ' + str(puntaje), True, NEGRO)
+    area_rect = area_impresion.get_rect()
+    area_rect.midtop = (ANCHO/2, ALTURA/2)
+    ventana.blit(area_impresion, area_rect)
+    pygame.display.flip()
+    sleep(2)
+    pygame.quit()
+    quit()
+
+def print_puntaje(ventana, puntaje):
+    fuente = pygame.font.SysFont('Arial',30)
+    area_impresion = fuente.render('Puntaje: ' + str(puntaje), True, NEGRO)
+    area_rect = area_impresion.get_rect()
+    ventana.blit(area_impresion, area_rect)
+    pygame.display.flip()
     
 main()
