@@ -30,16 +30,10 @@ def main():
     pos_snake = [340,300] #Posicion de la cabeza del snake en todo momento.
     fruta = posicion_aleatoria(ANCHO,ALTURA,snake);
     puntaje = 0
+    iniciado = False
     
-    cabeza_izq = pygame.image.load("cabeza_izquierda.png").convert()
-    cabeza_izq.set_colorkey(NEGRO)
-    cabeza_der = pygame.image.load("cabeza_derecha.png").convert()
-    cabeza_der.set_colorkey(NEGRO)
-    cabeza_up = pygame.image.load("cabeza_arriba.png").convert()
-    cabeza_up.set_colorkey(NEGRO)
-    cabeza_abj = pygame.image.load("cabeza_abajo.png").convert()
-    cabeza_abj.set_colorkey(NEGRO)
-
+    cabeza_imagen = pygame.image.load("cabeza.png").convert()
+    cabeza_imagen.set_colorkey(NEGRO)
     cuerpo_imag = pygame.image.load("cuerpo.png").convert()
     cuerpo_imag.set_colorkey(NEGRO)
 
@@ -47,11 +41,11 @@ def main():
     fruta_imag.set_colorkey(NEGRO)
 
     direccion = 'LEFT'
-    cabeza_imagen = cabeza_izq
     dir_siguiente = direccion
 
     while(True):
-        direccion, dir_siguiente, cabeza_imagen = mover_snake(direccion, dir_siguiente, cabeza_imagen, cabeza_der, cabeza_abj, cabeza_up, cabeza_izq, pos_snake)
+        
+        direccion, dir_siguiente = mover_snake(direccion, dir_siguiente, cabeza_imagen, pos_snake)
         snake.append(pos_snake.copy())
         if pos_snake == fruta:
             fruta = posicion_aleatoria(ANCHO,ALTURA,snake);
@@ -61,15 +55,18 @@ def main():
 
         ventana.blit(fondo, [0, 0])
 
-        imprimir_campo(snake, fruta, ventana, cabeza_imagen, cuerpo_imag, fruta_imag, pos_snake)
+        imprimir_campo(snake, fruta, ventana, direccion, cabeza_imagen, cuerpo_imag, fruta_imag, pos_snake)
         if es_perdedor(snake, pos_snake): 
             game_over(ventana, puntaje)
         print_puntaje(ventana, puntaje)
         pygame.display.update()
+        if not iniciado:
+            sleep(2)
+            iniciado = True
         fps.tick(VELOCIDAD)
     return
 
-def mover_snake(direccion, dir_siguiente, cabeza_imagen, cabeza_der, cabeza_abj, cabeza_up, cabeza_izq, pos_snake):
+def mover_snake(direccion, dir_siguiente, cabeza_imagen, pos_snake):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -96,18 +93,14 @@ def mover_snake(direccion, dir_siguiente, cabeza_imagen, cabeza_der, cabeza_abj,
     # Mueve el snake un bloque
     if direccion == 'UP':
         pos_snake[1] -= 20
-        cabeza_imagen = cabeza_up
     if direccion == 'DOWN':
         pos_snake[1] += 20
-        cabeza_imagen = cabeza_abj
     if direccion == 'LEFT':
         pos_snake[0] -= 20
-        cabeza_imagen = cabeza_izq
     if direccion == 'RIGHT':
         pos_snake[0] += 20
-        cabeza_imagen = cabeza_der
         
-    return [direccion, dir_siguiente, cabeza_imagen]
+    return [direccion, dir_siguiente]
     
 def posicion_aleatoria(ancho, altura, snake):
     '''Recibe las dimensiones de un campo de ALTURAxANCHO, y la lista de posiciones del snake.
@@ -118,15 +111,20 @@ def posicion_aleatoria(ancho, altura, snake):
         [x, y] = [randint(1, (ANCHO-20)//20)*20, randint(1, (ALTURA-20)//20)*20]
     return [x, y]
     
-def imprimir_campo(snake, fruta, ventana, cabeza_imagen, cuerpo_imag, fruta_imag, pos_snake):
-    #ventana.blit(cabeza_imagen, pos_snake)
-    for i, posicion in enumerate(snake[1:]):
-        #if i == 0: #Cabeza del snake
-        #    ventana.blit(cabeza_imagen, pos_snake)
-        #else: #Cuerpo general
+def imprimir_campo(snake, fruta, ventana, direccion, cabeza_imagen, cuerpo_imag, fruta_imag, pos_snake):
+    for posicion in snake[:-1]:
         ventana.blit(cuerpo_imag, (posicion[0], posicion[1]))
-        #pygame.draw.rect(ventana, COLOR_CUERPO, pygame.Rect(posicion[0],posicion[1],20,20))
-    ventana.blit(cabeza_imagen, pos_snake)
+    if direccion == 'UP':
+        cabeza_rot = pygame.transform.rotate(cabeza_imagen,90)
+    if direccion == 'DOWN':
+        cabeza_rot = pygame.transform.rotate(cabeza_imagen,270)
+    if direccion == 'LEFT':
+        cabeza_rot = pygame.transform.rotate(cabeza_imagen,180)
+    if direccion == 'RIGHT':
+        cabeza_rot = cabeza_imagen
+        
+        
+    ventana.blit(cabeza_rot, pos_snake)
     ventana.blit(fruta_imag, (fruta[0], fruta[1]))
     
 def es_perdedor(snake, pos_snake):
