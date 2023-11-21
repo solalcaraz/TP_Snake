@@ -28,7 +28,12 @@ def main():
     
     snake = [[400,300],[380,300],[360,300],[340,300]]
     pos_snake = [340,300] #Posicion de la cabeza del snake en todo momento.
-    roca = []
+    roca = [[400,400],[420,420],[420,400],[400,420],[160,160],[180,180],[200,200]]
+
+    for i in range(4):
+        nueva_roca = posicion_aleatoria(ANCHO, ALTURA, snake, roca)
+        roca.append(nueva_roca.copy())
+
     fruta = posicion_aleatoria(ANCHO,ALTURA,snake,roca);
     puntaje = 0
     iniciado = False
@@ -47,9 +52,6 @@ def main():
     direccion = 'LEFT'
     dir_siguiente = direccion
 
-    for i in range(10):
-        nueva_roca = posicion_aleatoria(ANCHO, ALTURA, snake, roca)
-        roca.append(nueva_roca.copy())
 
     while(True):
         
@@ -115,7 +117,7 @@ def posicion_aleatoria(ancho, altura, snake, roca):
        Devuelve una posición [x,y] vacía aleatoria dentro de esas dimensiones.
        En este caso, "vacía" significa que la posición no se encuentra ocupada por el snake.'''
     [x, y] = [randint(1, (ANCHO-20)//20)*20, randint(1, (ALTURA-20)//20)*20]
-    while [x, y] in snake or [x,y] in roca:
+    while [x, y] in snake or [x, y] in roca:
         [x, y] = [randint(1, (ANCHO-20)//20)*20, randint(1, (ALTURA-20)//20)*20]
     return [x, y]
     
