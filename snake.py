@@ -24,19 +24,8 @@ def main():
     pygame.display.set_caption('Juego Snake')
     ventana = pygame.display.set_mode((ANCHO, ALTURA))
     fps = pygame.time.Clock()
-    fondo = pygame.image.load("fondo.png").convert()
     
-    snake = [[400,300],[380,300],[360,300],[340,300]]
-    pos_snake = [340,300] #Posicion de la cabeza del snake en todo momento.
-    roca = [[400,400],[420,420],[420,400],[400,420],[160,160],[180,180],[200,200]]
-
-    for i in range(4):
-        nueva_roca = posicion_aleatoria(ANCHO, ALTURA, snake, roca)
-        roca.append(nueva_roca.copy())
-
-    fruta = posicion_aleatoria(ANCHO,ALTURA,snake,roca);
-    puntaje = 0
-    iniciado = False
+    fondo = pygame.image.load("fondo.png").convert()
     
     cabeza_imagen = pygame.image.load("cabeza.png").convert()
     cabeza_imagen.set_colorkey(NEGRO)
@@ -48,33 +37,43 @@ def main():
 
     roca_imag = pygame.image.load("roca.png").convert()
     roca_imag.set_colorkey(BLANCO)
-
-    direccion = 'LEFT'
-    dir_siguiente = direccion
-
-
+    
     while(True):
+        snake = [[400,300],[380,300],[360,300],[340,300]]
+        pos_snake = [340,300] #Posicion de la cabeza del snake en todo momento.
+        roca = [[400,400],[420,420],[420,400],[400,420],[160,160],[180,180],[200,200]]
         
-        direccion, dir_siguiente = mover_snake(direccion, dir_siguiente, cabeza_imagen, pos_snake)
-        snake.append(pos_snake.copy())
-        if pos_snake == fruta:
-            fruta = posicion_aleatoria(ANCHO,ALTURA,snake,roca);
-            puntaje += 1
-        else:
-            snake = snake[1:]
+        for i in range(4):
+            nueva_roca = posicion_aleatoria(ANCHO, ALTURA, snake, roca)
+            roca.append(nueva_roca.copy())
 
-        ventana.blit(fondo, [0, 0])
+        fruta = posicion_aleatoria(ANCHO,ALTURA,snake,roca);
+        puntaje = 0
+        iniciado = False
+        direccion = 'LEFT'
+        dir_siguiente = direccion
 
-        imprimir_campo(snake, roca, fruta, ventana, direccion, cabeza_imagen, cuerpo_imag, fruta_imag, roca_imag, pos_snake)
-        if es_perdedor(snake, roca, pos_snake):
-            game_over(ventana, puntaje)
-        print_puntaje(ventana, puntaje)
-        pygame.display.update()
-        if not iniciado:
-            sleep(2)
-            iniciado = True
-        fps.tick(VELOCIDAD)
-    return
+        while(True):
+            direccion, dir_siguiente = mover_snake(direccion, dir_siguiente, cabeza_imagen, pos_snake)
+            snake.append(pos_snake.copy())
+            if pos_snake == fruta:
+                fruta = posicion_aleatoria(ANCHO,ALTURA,snake,roca);
+                puntaje += 1
+            else:
+                snake = snake[1:]
+
+            ventana.blit(fondo, [0, 0])
+
+            imprimir_campo(snake, roca, fruta, ventana, direccion, cabeza_imagen, cuerpo_imag, fruta_imag, roca_imag, pos_snake)
+            if es_perdedor(snake, roca, pos_snake):
+                game_over(ventana, puntaje)
+                break
+            print_puntaje(ventana, puntaje)
+            pygame.display.update()
+            if not iniciado:
+                pygame.event.wait()
+                iniciado = True
+            fps.tick(VELOCIDAD)
 
 def mover_snake(direccion, dir_siguiente, cabeza_imagen, pos_snake):
     for event in pygame.event.get():
@@ -113,7 +112,7 @@ def mover_snake(direccion, dir_siguiente, cabeza_imagen, pos_snake):
     return [direccion, dir_siguiente]
     
 def posicion_aleatoria(ancho, altura, snake, roca):
-    '''Recibe las dimensiones de un campo de ALTURAxANCHO, y la lista de posiciones del snake.
+    '''Recibe las dimensiones de un campo de ALTURAxANCHO, y la lista de posiciones del snake y los obstaculos.
        Devuelve una posición [x,y] vacía aleatoria dentro de esas dimensiones.
        En este caso, "vacía" significa que la posición no se encuentra ocupada por el snake.'''
     [x, y] = [randint(1, (ANCHO-20)//20)*20, randint(1, (ALTURA-20)//20)*20]
@@ -156,19 +155,43 @@ def es_perdedor(snake, roca, pos_snake):
     return False
 
 def game_over(ventana, puntaje):
+    print_gameover(ventana, puntaje)
+    while(True):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+                if event.key == pygame.K_r:
+                    pygame.event.clear()
+                    return
+    
+def print_gameover(ventana, puntaje):
     rect_negro = pygame.Rect(0,0,800,600)
     sup_negra = pygame.Surface(rect_negro.size,pygame.SRCALPHA)
     pygame.draw.rect(sup_negra, NEGRO, sup_negra.get_rect())
     ventana.blit(sup_negra,rect_negro)
-    fuente = pygame.font.SysFont('Times new roman',50)
-    area_impresion = fuente.render('Has Muerto. Puntaje: ' + str(puntaje), True, NEGRO)
-    area_rect = area_impresion.get_rect()
-    area_rect.midtop = (ANCHO/2, ALTURA/2-50)
-    ventana.blit(area_impresion, area_rect)
+    fuente1 = pygame.font.SysFont('Times new roman',55)
+    fuente2 = pygame.font.SysFont('Times new roman',30)
+    over_impresion = fuente1.render('Has Muerto. Puntaje: ' + str(puntaje), True, NEGRO)
+    over_rect = over_impresion.get_rect()
+    over_rect.midtop = (ANCHO/2, ALTURA/2-50)
+    menu1_impresion = fuente2.render('Presione [q] para salir.', True, NEGRO)
+    menu2_impresion = fuente2.render('Presione [r] para volver a jugar.', True, NEGRO)
+    menu1_rect = menu1_impresion.get_rect()
+    menu1_rect.midtop = (ANCHO/2-100, ALTURA/2+10)
+    menu2_rect = menu1_impresion.get_rect()
+    menu2_rect.midtop = (ANCHO/2-100, ALTURA/2+50)
+    
+    ventana.blit(over_impresion, over_rect)
+    ventana.blit(menu1_impresion, menu1_rect)
+    ventana.blit(menu2_impresion, menu2_rect)
     pygame.display.flip()
-    sleep(2)
-    pygame.quit()
-    quit()
+    
+
 
 def print_puntaje(ventana, puntaje):
     fuente = pygame.font.SysFont('Arial',30)
@@ -176,5 +199,7 @@ def print_puntaje(ventana, puntaje):
     area_rect = area_impresion.get_rect()
     ventana.blit(area_impresion, area_rect)
     pygame.display.flip()
+    
+    
     
 main()
