@@ -16,7 +16,6 @@ COLOR_CUERPO = (0, 255, 255)
 COLOR_FRUTA = (255, 200, 0)
 
 LARGO_MAX = 10
-VELOCIDAD = 15
 
 
 def main():
@@ -25,6 +24,7 @@ def main():
     ventana = pygame.display.set_mode((ANCHO, ALTURA))
     fps = pygame.time.Clock()
     
+    menu = pygame.image.load("menu.png").convert()    
     fondo = pygame.image.load("fondo.png").convert()
     
     cabeza_imagen = pygame.image.load("cabeza.png").convert()
@@ -42,7 +42,7 @@ def main():
         snake = [[400,300],[380,300],[360,300],[340,300]]
         pos_snake = [340,300] #Posicion de la cabeza del snake en todo momento.
         roca = [[400,400],[420,420],[420,400],[400,420],[160,160],[180,180],[200,200]]
-        
+
         for i in range(4):
             nueva_roca = posicion_aleatoria(ANCHO, ALTURA, snake, roca)
             roca.append(nueva_roca.copy())
@@ -52,6 +52,9 @@ def main():
         iniciado = False
         direccion = 'LEFT'
         dir_siguiente = direccion
+        VELOCIDAD = 10
+
+        menu_inicial(ventana, menu)
 
         while(True):
             direccion, dir_siguiente = mover_snake(direccion, dir_siguiente, cabeza_imagen, pos_snake)
@@ -59,6 +62,8 @@ def main():
             if pos_snake == fruta:
                 fruta = posicion_aleatoria(ANCHO,ALTURA,snake,roca);
                 puntaje += 1
+                VELOCIDAD *= 1.05
+                print(VELOCIDAD)
             else:
                 snake = snake[1:]
 
@@ -154,6 +159,24 @@ def es_perdedor(snake, roca, pos_snake):
 
     return False
 
+def menu_inicial(ventana, menu):
+    ventana.blit(menu, [0, 0])
+    pygame.display.update()
+
+    while (True):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:
+                    pygame.quit()
+                    quit()
+                if event.key == pygame.K_a:
+                    pygame.event.clear()
+                    return
+    pygame.time.delay(50)
+
 def game_over(ventana, puntaje):
     print_gameover(ventana, puntaje)
     while(True):
@@ -190,8 +213,6 @@ def print_gameover(ventana, puntaje):
     ventana.blit(menu1_impresion, menu1_rect)
     ventana.blit(menu2_impresion, menu2_rect)
     pygame.display.flip()
-    
-
 
 def print_puntaje(ventana, puntaje):
     fuente = pygame.font.SysFont('Arial',30)
